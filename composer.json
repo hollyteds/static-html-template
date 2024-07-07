@@ -1,0 +1,24 @@
+{
+    "name": "hollyteds/static_html_template",
+	"description": "Add a Static Website as a Template in WordPress.",
+	"license": "GPL-2.0-or-later",
+	"authors": [
+		{
+			"name": "Hollyteds"
+		}
+	],
+    "require-dev": {
+        "squizlabs/php_codesniffer": "*",
+        "wp-coding-standards/wpcs": "^3.1"
+    },
+    "scripts": {
+		"phpcs": "phpcs --config-set installed_paths vendor/wp-coding-standards/wpcs,vendor/phpcsstandards/phpcsextra,vendor/phpcsstandards/phpcsutils",
+		"lint": "phpcs ./ --standard=./phpcs.ruleset.xml",
+        "phpcbf": "phpcbf ./ --standard=./phpcs.ruleset.xml"
+	},
+    "config": {
+        "allow-plugins": {
+            "dealerdirect/phpcodesniffer-composer-installer": true
+        }
+    }
+}
