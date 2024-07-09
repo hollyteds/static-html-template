@@ -1,0 +1,14 @@
+# Copyright (C) 2013 WordPress
+# This file is distributed under the same license as the WordPress package.
+msgid ""
+msgstr ""
+"Project-Id-Version: Hello World Project\n"
+"Report-Msgid-Bugs-To: http://wppolyglots.wordpress.com\n"
+"POT-Creation-Date: 2013-12-26 17:03+0900\n"
+"PO-Revision-Date: 2013-12-26 17:03+0900\n"
+"Last-Translator: masayuki abe <YOUR-EMAIL@abe.com>\n"
+"Language-Team: abechiyo <YOUR-EMAIL@kddi-web.com>\n"
+"Language: ja_JP\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"

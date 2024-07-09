@@ -1,5 +1,5 @@
 <?php
-
+namespace Shct;
 /**
  * 投稿タイプの追加
  *
@@ -11,18 +11,39 @@
 add_action(
 	'init',
 	function () {
-
 		$post_types = array(
 			array(
-				'slug'    => 'static_html_setting', //投稿タイプスラッグ
+				'slug'    => 'static_html_setting',
 
 				'setting' => array(
-					'label'                 => __( 'Static Page Setting', 'static-code-template' ),
+					'label'                 => __( 'Static Page Setting', 'static-html-template' ),
 					'labels'                => array(
-						'name'          => __( 'Static Page', 'static-code-template' ),
-						'singular_name' => __( 'Static Page', 'static-code-template' ),
-						'menu_name'     => __( 'Static Page', 'static-code-template' ),
-						'all_items'     => __( 'Static Page', 'static-code-template' ),
+						'name'                  => __( 'Static Web Sites', 'static-html-template' ),
+						'singular_name'         => __( 'Static Web Site', 'static-html-template' ),
+						'menu_name'             => __( 'Static Web Site', 'static-html-template' ),
+						'add_new'               => __( 'Add New Static Web Site', 'static-html-template' ),
+						'add_new_item'          => __( 'Add New Static Web Site', 'static-html-template' ),
+						'edit_item'             => __( 'Edit Setting', 'static-html-template' ),
+						'new_item'              => __( 'New Setting', 'static-html-template' ),
+						'view_item'             => __( 'View Setting', 'static-html-template' ),
+						'view_items'            => __( 'View Settings', 'static-html-template' ),
+						'search_items'          => __( 'Search Settings', 'static-html-template' ),
+						'not_found'             => __( 'No Settings found.', 'static-html-template' ),
+						'not_found_in_trash'    => __( 'No Settings found in Trash.', 'static-html-template' ),
+						'parent_item_colon'     => __( 'Parent Setting:', 'static-html-template' ),
+						'all_items'             => __( 'All Items', 'static-html-template' ),
+						'archives'              => __( 'Setting Archives', 'static-html-template' ),
+						'attributes'            => __( 'Setting Attributes', 'static-html-template' ),
+						'insert_into_item'      => __( 'Insert into Setting', 'static-html-template' ),
+						'uploaded_to_this_item' => __( 'Uploaded to this Setting', 'static-html-template' ),
+						'featured_image'        => __( 'Featured Image', 'static-html-template' ),
+						'set_featured_image'    => __( 'Set featured image', 'static-html-template' ),
+						'remove_featured_image' => __( 'Remove featured image', 'static-html-template' ),
+						'use_featured_image'    => __( 'Use as featured image', 'static-html-template' ),
+						'menu_name'             => __( 'Static Web Site', 'static-html-template' ),
+						'filter_items_list'     => __( 'Filter Settings list', 'static-html-template' ),
+						'items_list_navigation' => __( 'Settings list navigation', 'static-html-template' ),
+						'items_list'            => __( 'Settings list', 'static-html-template' ),
 
 					),
 					'description'           => '',
@@ -56,11 +77,4 @@ add_action(
 		}
 	},
 	20
-);
-
-add_action(
-	'admin_menu',
-	function () {
-		remove_meta_box( 'slugdiv', 'static_page_setting', 'normal' );
-	}
 );

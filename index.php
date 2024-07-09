@@ -1,4 +1,5 @@
 <?php
+namespace Shct;
 /**
  * Plugin Name: Static Code Template
  * Text Domain: static-html-template
@@ -8,21 +9,42 @@
  */
 defined( 'ABSPATH' ) || exit;
 
-// Post type.
-require_once __DIR__ . '/inc/add-post-type.php';
+define( 'SHT_DIR_URL', plugins_url( '/', __FILE__ ) );
 
-// Functions.
+// Functions
 require_once __DIR__ . '/inc/functions.php';
 
-// Admin menu settings.
-require_once __DIR__ . '/inc/admin-menu-settings.php';
+// Post type
+require_once __DIR__ . '/inc/add-post-type.php';
+
+// Form Parts
+require_once __DIR__ . '/inc/class-set-form-parts.php';
+
+// Admin menu settings
+require_once __DIR__ . '/inc/admin-settings.php';
 
 // Sanitize
-require_once __DIR__ . '/inc/sanitize-upload-data.php';
+require_once __DIR__ . '/inc/class-sanitize-upload-data.php';
+
+// Generate html data
+require_once __DIR__ . '/inc/generate-html-data.php';
+
+// Save Setting Data
+require_once __DIR__ . '/inc/save-setting-data.php';
 
 // dequeue
 require_once __DIR__ . '/inc/enqueue-script.php';
 
+
+/**
+ * Adds an action to load the plugin text domain when the plugins are loaded.
+ *
+ * This function loads the translation files for the 'static-html-template' plugin.
+ * It is executed when the 'plugins_loaded' action is triggered.
+ * The translation files are located in the '/languages' directory of the plugin.
+ *
+ * @since 1.0.0
+ */
 add_action(
 	'plugins_loaded',
 	function () {
@@ -43,7 +65,7 @@ add_action(
 add_filter(
 	'theme_page_templates',
 	function ( $templates ) {
-		$templates['static-html-template.php'] = __( 'Static code template', 'static-html-template' );
+		$templates['static-html-template.php'] = __( 'Static html template', 'static-html-template' );
 		return $templates;
 	}
 );
@@ -61,9 +83,8 @@ add_filter(
 add_filter(
 	'page_template',
 	function ( $template ) {
-		if ( is_page_template( 'static-html-template.php' ) ) {
-			return plugin_dir_path( __FILE__ ) . 'static-html-template.php';
-		}
-		return $template;
+		if ( ! is_static_page() ) {
+			return $template;}
+		return plugin_dir_path( __FILE__ ) . 'static-html-template.php';
 	}
 );

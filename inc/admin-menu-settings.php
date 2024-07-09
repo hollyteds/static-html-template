@@ -22,15 +22,6 @@ add_action(
 		);
 
 		add_meta_box(
-			'test',
-			'Static HTML Template',
-			'scht_settings_page',
-			'static_html_setting',
-			'custom-context',
-			'high'
-		);
-
-		add_meta_box(
 			'shct-select-template',
 			__( 'Select HTML file ID.', 'static-html-template' ),
 			function ( $post ) {
@@ -45,8 +36,8 @@ add_action(
 		<select id="shct-template-id" name="shct_selected_template_id">
 				<?php
 				foreach ( $options as $index => $value ) {
-					$attr_selected = $selected_id == $index ? ' selected' : '';
-					echo '<option' . $attr_selected . ' value="' . $index . '">' . $value['id'] . '</option>';
+					$attr_selected = $selected_id === strval( $index ) ? ' selected' : '';
+					echo '<option' . $attr_selected . ' value="' . strval( $index ) . '">' . $value['id'] . '</option>';
 				}
 				?>
 		</select>
@@ -70,10 +61,15 @@ add_action(
  *
  * @return void
  */
-add_action('edit_form_after_title', function () {
-	if( is_singular( !'static_html_setting' ) ) return;
-	scht_settings_page();
-});
+add_action(
+	'edit_form_after_title',
+	function () {
+		if ( is_singular( ! 'static_html_setting' ) ) {
+			return;
+		}
+		scht_settings_page();
+	}
+);
 
 add_action(
 	'save_post',
@@ -321,3 +317,4 @@ function shct_set_textarea( $option, $value = '' ) {
 	$placeholder = isset( $option['placeholder'] ) ? $option['placeholder'] : __( 'If there are multiple entries, input them with line breaks.', 'static-html-template' );
 	echo '<td><textarea name="scht_settings[' . $option['key'] . '][' . $option['name'] . ']" cols="' . $size . '" rows="6" placeholder="' . $placeholder . '">' . $set_value . '</textarea></td>';
 }
+

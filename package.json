@@ -5,7 +5,9 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "tsc": "tsc"
+    "tsc": "tsc",
+    "css": "webpack --config style-builder.js --mode development",
+    "css:min": "NODE_ENV=production webpack --config style-builder.js --mode production"
   },
   "author": "hollyteds",
   "license": "GPL-2.0-or-later",
@@ -13,6 +15,17 @@
     "typescript": "^5.5.3"
   },
   "dependencies": {
-    "@wordpress/scripts": "^28.2.0"
+    "@wordpress/scripts": "^28.2.0",
+    "autoprefixer": "^10.4.19",
+    "css-declaration-sorter": "^7.2.0",
+    "css-loader": "^7.1.2",
+    "css-minimizer-webpack-plugin": "^7.0.0",
+    "id": "^0.0.0",
+    "mini-css-extract-plugin": "^2.9.0",
+    "postcss": "^8.4.39",
+    "postcss-loader": "^8.1.1",
+    "postcss-sort-media-queries": "^5.2.0",
+    "sass": "^1.77.6",
+    "webpack-remove-empty-scripts": "^1.0.4"
   }
 }
