@@ -8,59 +8,17 @@ namespace Shct;
  * page is accessible to users with the 'manage_options' capability.
  */
 
-add_action(
-	'add_meta_boxes',
-	function () {
-		if ( is_edit( 'static_html_setting' ) ) {
-			remove_meta_box( 'submitdiv', 'static_html_setting', 'side' );
-		}
-		add_meta_box(
-			'shct-select-template',
-			__( 'Static HTML Template', 'static-html-template' ),
-			function ( $post ) {
-				$shct_templates = get_posts(
-					array(
-						'posts_per_page' => -1,
-						'post_type'      => 'static_html_setting',
-						'post_status'    => 'publish',
-					)
-				);
-				if ( empty( $shct_templates ) ) {
-					return;
-				}
-				wp_nonce_field( 'shct_select_template_nonce_action', 'shct_select_template_nonce' );
-				$selected_id = get_post_meta( $post->ID, '_shct_selected_template_id', true );
-				?>
-		<div class="shct-post-meta-box">
-		<label for="shct-template-id" class="shct-template-title"><?php _e( 'Select the static HTML template.', 'static-html-template' ); ?></label>
-		<select id="shct-template-id" name="shct_selected_template_id">
-				<?php
-				foreach ( $shct_templates as $template ) {
-					$attr_selected = (int) $selected_id === $template->ID ? ' selected' : '';
-					echo '<option' . $attr_selected . ' value="' . $template->ID . '">' . esc_html( $template->post_title ) . '</option>';
-				}
-				?>
-		</select>
-		<p class="description"><?php _e( 'This template is invalid on the front page and blog homepage.', 'static-html-template' ); ?></p>
-		</div>
-				<?php
-			},
-			'page',
-			'side',
-			'high'
-		);
-	}
-);
 
+require_once SHT_DIR_PATH . 'inc/class-meta-box.php';  // meta box
+require_once SHT_DIR_PATH . 'inc/class-save-meta-data.php'; // Save
+require_once SHT_DIR_PATH . 'inc/class-set-form-parts.php'; // Form Parts
+
+
+new MetaBox();
+new SaveMetaData();
 
 /**
  * Adds a custom meta box to the edit form after the title for the 'static_html_setting' post type.
- *
- * This function is hooked to the 'edit_form_after_title' action.
- * It checks if the current post is of the 'static_html_setting' post type.
- * If it is, it adds a container div and calls the 'do_meta_boxes' function to display the meta boxes.
- *
- * @return void
  */
 add_action(
 	'edit_form_after_title',
@@ -85,39 +43,6 @@ add_action(
 				<p><?php _e( 'It is an invalid path. Please provide a valid path.', 'static-html-template' ); // 無効なパスです。有効なパスを入力してください。 ?></p>
 			</div>
 			<?php
-		}
-	}
-);
-
-/**
- * This code is responsible for saving the selected template ID when a post is saved.
- *
- * @param int $post_id The ID of the post being saved.
- * @return void
- */
-add_action(
-	'save_post',
-	function ( $post_id ) {
-
-		// ノンスチェック（セキュリティ対策）
-		if ( ! isset( $_POST['shct_select_template_nonce'] ) || ! wp_verify_nonce( $_POST['shct_select_template_nonce'], 'shct_select_template_nonce_action' ) ) {
-			return;
-		}
-
-		// 自動保存の場合は何もしない
-		if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) {
-			return;
-		}
-
-		// ユーザー権限のチェック
-		if ( ! current_user_can( 'edit_page', $post_id ) ) {
-			return;
-		}
-
-		// 入力フィールドの値を取得
-		if ( isset( $_POST['shct_selected_template_id'] ) ) {
-			$custom_field_value = sanitize_text_field( $_POST['shct_selected_template_id'] );
-			update_post_meta( $post_id, '_shct_selected_template_id', $custom_field_value );
 		}
 	}
 );
@@ -157,11 +82,15 @@ add_action(
 	'manage_static_html_setting_posts_custom_column',
 	function ( $column_name, $post_id ) {
 		$settings = get_post_meta( $post_id, '_scht_settings', true );
-		if ( 'path' == $column_name ) {
+		if ( 'path' === $column_name ) {
 			echo isset( $settings['path'] ) ? $settings['path'] : __( 'undefined', 'static-html-template' );
 		}
-		if ( 'status' == $column_name ) {
-			_e( get_path_status( $post_id ), 'static-html-template' );
+		if ( 'status' === $column_name ) {
+			if ( get_path_status( $post_id ) === 'valid' ) {
+				_e( 'valid', 'static-html-template' );
+			} else {
+				_e( 'invalid', 'static-html-template' );
+			}
 		}
 	},
 	10,
@@ -174,7 +103,7 @@ add_action(
 function set_forms() {
 	$settings = get_post_meta( get_the_ID(), '_scht_settings', true );
 
-	$form = new FormParts( $settings );
+	$form = new SetFormParts( $settings );
 	// セキュリティのためのnonceフィールドを追加
 	wp_nonce_field( 'custom_save_meta_box_data', 'custom_meta_box_nonce' );
 
@@ -218,7 +147,7 @@ add_filter(
 	'post_row_actions',
 	function ( $actions, $post ) {
 
-		if ( $post->post_type == 'static_html_setting' ) {
+		if ( $post->post_type === 'static_html_setting' ) {
 			unset( $actions['inline hide-if-no-js'] );
 		}
 		return $actions;
@@ -238,11 +167,11 @@ add_action(
 	function ( $new_status, $old_status, $post ) {
 		$post_type = 'static_html_setting';
 
-		if ( $post->post_type != $post_type ) {
+		if ( $post->post_type !== $post_type ) {
 			return;
 		}
 
-		if ( ! in_array( $new_status, array( 'publish', 'trash', 'auto-draft' ) ) ) {
+		if ( ! in_array( $new_status, array( 'publish', 'trash', 'auto-draft' ), true ) ) {
 			wp_update_post(
 				array(
 					'ID'          => $post->ID,
@@ -254,67 +183,6 @@ add_action(
 	10,
 	3
 );
-
-/**
- * Adds a meta box for the post status in the WordPress admin panel.
- */
-add_action(
-	'add_meta_boxes',
-	function () {
-		add_meta_box(
-			'submitdiv',
-			__( 'Status' ),
-			function ( $post ) {
-						$post_id = (int) $post->ID;
-						$value   = $post->post_status != 'publish' ? esc_attr__( 'Publish' ) : esc_attr__( 'Save' );
-
-				?>
-					<div class="submitbox" id="submitpost">
-						<div id="major-publishing-actions">
-							<div id="delete-action">
-									<?php
-									if ( current_user_can( 'delete_post', $post_id ) ) {
-										if ( ! EMPTY_TRASH_DAYS ) {
-											$delete_text = __( 'Delete permanently' );
-										} else {
-											$delete_text = __( 'Move to Trash' );
-										}
-										?>
-										<a class="submitdelete deletion" href="<?php echo get_delete_post_link( $post_id ); ?>"><?php echo $delete_text; ?></a>
-										<?php
-									}
-									?>
-							</div>
-
-							<div id="publishing-action">
-								<span class="spinner"></span>
-									<?php
-									if ( ! in_array( $post->post_status, array( 'publish', 'future', 'private' ), true ) || 0 === $post_id ) {
-										?>
-										<input name="original_publish" type="hidden" id="original_publish" value="<?php esc_attr_e( 'Publish' ); ?>" />
-										<?php submit_button( __( 'Publish' ), 'primary large', 'publish', false ); ?>
-										<?php
-									} else {
-										?>
-										<input name="original_publish" type="hidden" id="original_publish" value="<?php esc_attr_e( 'Update' ); ?>" />
-										<?php submit_button( __( 'Update' ), 'primary large', 'save', false, array( 'id' => 'publish' ) ); ?>
-										<?php
-									}
-									?>
-							</div>
-
-							<div class="clear"></div>
-						</div>
-					</div>
-						<?php
-			},
-			'static_html_setting',
-			'side',
-			'high'
-		);
-	}
-);
-
 
 /**
  * Registers and enqueues the admin stylesheet for the Static HTML Template plugin.

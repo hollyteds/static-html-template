@@ -2,7 +2,7 @@
 
 namespace Shct;
 
-class FormParts {
+class SetFormParts {
 	public array $data;
 
 	public function __construct( $data ) {

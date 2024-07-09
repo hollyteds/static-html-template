@@ -10,30 +10,19 @@ namespace Shct;
 defined( 'ABSPATH' ) || exit;
 
 define( 'SHT_DIR_URL', plugins_url( '/', __FILE__ ) );
+define( 'SHT_DIR_PATH', plugin_dir_path( __FILE__ ) . '/' );
 
 // Functions
-require_once __DIR__ . '/inc/functions.php';
+require_once SHT_DIR_PATH . 'inc/functions.php';
 
 // Post type
-require_once __DIR__ . '/inc/add-post-type.php';
-
-// Form Parts
-require_once __DIR__ . '/inc/class-set-form-parts.php';
+require_once SHT_DIR_PATH . 'inc/add-post-type.php';
 
 // Admin menu settings
-require_once __DIR__ . '/inc/admin-settings.php';
-
-// Sanitize
-require_once __DIR__ . '/inc/class-sanitize-upload-data.php';
-
-// Generate html data
-require_once __DIR__ . '/inc/generate-html-data.php';
-
-// Save Setting Data
-require_once __DIR__ . '/inc/save-setting-data.php';
+require_once SHT_DIR_PATH . 'inc/admin-settings.php';
 
 // dequeue
-require_once __DIR__ . '/inc/enqueue-script.php';
+require_once SHT_DIR_PATH . 'inc/enqueue-script.php';
 
 
 /**
@@ -88,3 +77,14 @@ add_filter(
 		return plugin_dir_path( __FILE__ ) . 'static-html-template.php';
 	}
 );
+
+
+// add_action('enqueue_block_editor_assets', function () {
+//  wp_enqueue_script(
+//          'gutenberg-custom-script',
+//          plugin_dir_path( __FILE__ ) . 'assets/ts/settingPage.js',
+//          array('wp-blocks', 'wp-element', 'wp-editor', 'wp-edit-post', 'wp-data'),
+//          false,
+//          true
+//  );
+// });

@@ -5,6 +5,9 @@ $post_id             = get_queried_object_id();
 $selected_id         = get_post_meta( $post_id, '_shct_selected_template_id', true );
 $split_html_contents = get_post_meta( $selected_id, '_scht_html', true );
 
+if ( ! is_array( $split_html_contents ) ) {
+	return;
+}
 echo $split_html_contents['before_head_close'] ?? '<html><head>';
 // do_action( 'shct_head' );
 wp_head();

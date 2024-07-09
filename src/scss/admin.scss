@@ -28,6 +28,10 @@
     margin-block-start: 16px;
     padding: 8px 0;
   }
+
+  input {
+    max-width: 100%;
+  }
 }
 
 // is_page
@@ -39,4 +43,5 @@
   .description {
     margin-block-start: 8px;
   }
+
 }
