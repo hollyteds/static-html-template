@@ -94,20 +94,38 @@ class MetaBox {
 		// nonce
 		wp_nonce_field( 'shct_select_template_nonce_action', 'shct_select_template_nonce' );
 
-		// get selected id.
-		$selected_id = get_post_meta( $post->ID, '_shct_selected_template_id', true );
+		// get shc id.
+		$shc_id = get_shc_id( $post->ID );
 		?>
 	<div class="shct-post-meta-box">
 	<label for="shct-template-id" class="shct-template-title"><?php _e( 'Select the static HTML template.', 'static-html-template' ); ?></label>
 	<select id="shct-template-id" name="shct_selected_template_id">
 		<?php
 		foreach ( $shct_templates as $template ) {
-			$attr_selected = (int) $selected_id === $template->ID ? ' selected' : '';
+			$attr_selected = (int) $shc_id === $template->ID ? ' selected' : '';
 			echo '<option' . $attr_selected . ' value="' . $template->ID . '">' . esc_html( $template->post_title ) . '</option>';
 		}
 		?>
 	</select>
-	<p class="description"><?php _e( 'This template is invalid on the front page and blog homepage.', 'static-html-template' ); ?></p>
+	<p class="description"><?php _e( 'Invalid on the front page and the blog page.', 'static-html-template' ); ?></p>
+	<div id="shct-dynasmic-link">
+		<?php
+		$dynamic_links = get_dynamic_links( $shc_id );
+		$values        = get_replace_links( $post->ID );
+		if ( $dynamic_links ) {
+			echo '<hr><h3>' . __( 'A list of shortcodes set in the template', 'static-html-template' ) . '</h3>';
+			echo '<p class="description">' . __( 'Replace the shortcodes set in the template\'s link with the entered strings for each item.', 'static-html-template' ) . '</p>';
+			foreach ( $dynamic_links as $link ) {
+				?>
+			<div>
+				<label for="scht_replace_link[<?php echo esc_attr( $link ); ?>]">[<?php echo esc_attr( $link ); ?>]</label>
+				<input type="text" name="scht_replace_link[<?php echo esc_attr( $link ); ?>]" size="100" value="<?php echo $values[ $link ] ?? ''; ?>">
+			</div>
+				<?php
+			}
+		}
+		?>
+		</div>
 	</div>
 		<?php
 	}

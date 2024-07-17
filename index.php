@@ -11,6 +11,7 @@ defined( 'ABSPATH' ) || exit;
 
 define( 'SHT_DIR_URL', plugins_url( '/', __FILE__ ) );
 define( 'SHT_DIR_PATH', plugin_dir_path( __FILE__ ) . '/' );
+define( 'SHC_TEMPLATE_NAME', 'static-html-template.php' );
 
 // Functions
 require_once SHT_DIR_PATH . 'inc/functions.php';
@@ -19,12 +20,13 @@ require_once SHT_DIR_PATH . 'inc/functions.php';
 require_once SHT_DIR_PATH . 'inc/add-post-type.php';
 
 // Admin menu settings
-require_once SHT_DIR_PATH . 'inc/admin-settings.php';
+require_once SHT_DIR_PATH . 'inc/class-admin-settings.php';
 
 // dequeue
 require_once SHT_DIR_PATH . 'inc/enqueue-script.php';
 
 
+new AdminSettings();
 /**
  * Adds an action to load the plugin text domain when the plugins are loaded.
  *
@@ -45,8 +47,7 @@ add_action(
  * Adds a new page template to the list of available templates in the theme.
  *
  * This function is a filter callback for the 'theme_page_templates' filter hook.
- * It adds a new template named 'Static LP Format' with the file name 'static-html-template.php'
- * to the list of available templates.
+ * It adds a new template named 'Static LP Format' to the list of available templates.
  *
  * @param array $templates An array of existing page templates.
  * @return array The modified array of page templates.
@@ -54,7 +55,7 @@ add_action(
 add_filter(
 	'theme_page_templates',
 	function ( $templates ) {
-		$templates['static-html-template.php'] = __( 'Static html template', 'static-html-template' );
+			$templates[ SHC_TEMPLATE_NAME ] = __( 'Static html template', 'static-html-template' );
 		return $templates;
 	}
 );
@@ -62,7 +63,7 @@ add_filter(
 /**
  * Adds a filter to modify the page template.
  *
- * This function checks if the current page template is 'static-html-template.php'.
+ * This function checks if the current page template is shc template.
  * If it is, it returns the path to the 'static-lp-template.php' file located in the plugin directory.
  * If not, it returns the original template path.
  *
@@ -72,9 +73,12 @@ add_filter(
 add_filter(
 	'page_template',
 	function ( $template ) {
-		if ( ! is_static_page() ) {
-			return $template;}
-		return plugin_dir_path( __FILE__ ) . 'static-html-template.php';
+		$shc_id = get_shc_id();
+
+		if ( ! get_html_contents( $shc_id ) || ! is_static_page() || ! is_path_valid( $shc_id ) ) {
+			return $template;
+		}
+		return plugin_dir_path( __FILE__ ) . SHC_TEMPLATE_NAME;
 	}
 );
 

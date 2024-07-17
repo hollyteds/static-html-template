@@ -1,10 +1,6 @@
 <?php
 namespace Shct;
 
-
-require_once SHT_DIR_PATH . 'inc/class-sanitize-upload-data.php'; // Sanitize
-require_once SHT_DIR_PATH . 'inc/class-get-html-contents.php'; // Generate html contents
-
 /**
  * Class SaveMetaData
  *
@@ -15,6 +11,9 @@ class SaveMetaData {
 
 	// Constructor
 	public function __construct() {
+
+		require_once SHT_DIR_PATH . 'inc/class-sanitize-upload-data.php'; // Sanitize
+		require_once SHT_DIR_PATH . 'inc/class-get-html-contents.php'; // Generate html contents
 
 		add_action( 'save_post', array( $this, 'save_settings_data' ) );
 		add_action( 'save_post', array( $this, 'save_template_id' ) );
@@ -30,14 +29,26 @@ class SaveMetaData {
 		// データが送信されているかどうかチェックし、クリーンアップして保存
 		if ( isset( $_POST['scht_settings'] ) ) {
 
-			$data = SanitizeUploadData::sanitize( $_POST['scht_settings'] );
+			$input = $_POST['scht_settings'];
+
+			$data = array(
+				'path'                 => SanitizeUploadData::path( $input['path'] ),
+				'enqueue_styles'       => SanitizeUploadData::enqueue( $input['enqueue_styles'] ),
+				'enqueue_scripts'      => SanitizeUploadData::enqueue( $input['enqueue_scripts'] ),
+				'disable_action_hooks' => isset( $input['disable_action_hooks'] ) ? 1 : 0,
+				'path_status'          => is_html_file_exists( $input['path'] ) ? 1 : 0,
+			);
 
 			// 設定項目を保存
 			update_post_meta( $post_id, '_scht_settings', $data );
 
 			// 保存されたpathを元に、最適化したhtmlデータも保存しておく
-			$html = new GetHTMLContents( $data['path'] );
+			$html = new GetHTMLContents();
 			update_post_meta( $post_id, '_scht_html', $html->contents );
+
+			if ( $html->links ) {
+				update_post_meta( $post_id, '_scht_dynamic_links', $html->links );
+			}
 		}
 	}
 
@@ -54,8 +65,16 @@ class SaveMetaData {
 
 		// 入力フィールドの値を取得
 		if ( isset( $_POST['shct_selected_template_id'] ) ) {
-			$data = sanitize_text_field( $_POST['shct_selected_template_id'] );
+
+			$data = SanitizeUploadData::number( $_POST['shct_selected_template_id'] );
 			update_post_meta( $post_id, '_shct_selected_template_id', $data );
+
+			if ( isset( $_POST['scht_replace_link'] ) ) {
+				$data = SanitizeUploadData::array( $_POST['scht_replace_link'], 'url' );
+				update_post_meta( $post_id, '_scht_replace_link', $data );
+			} else {
+				delete_post_meta( $post_id, '_scht_replace_link' );
+			}
 		}
 	}
 

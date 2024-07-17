@@ -3,28 +3,34 @@ namespace Shct;
 /**
  * Generates HTML data for a given path.
  *
- * @param string $path The path to the HTML file.
  * @return array The generated HTML data.
  */
 
 class GetHTMLContents {
 
 	public $contents;
+	public $links;
+	private $path;
+	private $replacements;
 
-	public function __construct( $path ) {
+	public function __construct() {
 
-		$error_code = '<html><head></head><body><!-- ' . __( 'Failed to retrieve the content.', 'static-html-template' ) . ' --></body></html>';
+		$options            = get_sht_options();
+		$this->path         = $options['path'];
+		$this->replacements = isset( $options['replacement'] ) && count( $options['replacement'] ) ? $options['replacement'] : null;
 
-		if ( ! is_html_file_exists( $path ) ) {
-
-			$this->contents = self::split_html( $error_code );
+		if ( ! is_html_file_exists( $this->path ) ) {
+			$this->contents = '';
 			return;
 		}
 
-		$html_contents = self::get_html_data( $path );
-		$file_url      = self::get_contents_url( $path );
-		$html_contents = $html_contents ? self::convert_relative_paths_to_absolute( $html_contents, $file_url ) : $error_code;
-
+		$html_contents = self::get_html_data( $this->path );
+		$file_url      = self::get_contents_url( $this->path );
+		$html_contents = $html_contents ? self::convert_relative_paths_to_absolute( $html_contents, $file_url ) : null;
+		// if($this->replacements) {
+		//  $html_contents = self::replace_links($html_contents);
+		// };
+		$this->links    = self::get_dynamic_links( $html_contents ) ?? null;
 		$this->contents = self::split_html( $html_contents );
 		return;
 	}
@@ -32,23 +38,21 @@ class GetHTMLContents {
 	/**
 	 * Retrieves HTML data from a file and converts relative paths to absolute paths.
 	 *
-	 * @param string $path The path to the HTML file.
 	 * @return string The HTML data with converted paths or a default error message if conversion fails.
 	 */
-	private function get_html_data( $path ) {
+	private function get_html_data() {
 
-		return file_get_contents( $path );
+		return file_get_contents( $this->path );
 	}
 
 	/**
 	* Retrieves the URL of the contents directory based on the given file path.
 	*
-	* @param string $path The file path.
 	* @return string The URL of the contents directory.
 	*/
-	private function get_contents_url( $path ) {
+	private function get_contents_url() {
 
-		$contents_path = dirname( $path );
+		$contents_path = dirname( $this->path );
 
 		return site_url( '/' ) . str_replace( $_SERVER['DOCUMENT_ROOT'], '', $contents_path );
 	}
@@ -73,7 +77,6 @@ class GetHTMLContents {
 			);
 		}
 
-		// マッチしなかった場合、元のHTMLをそのまま返す
 		return null;
 	}
 
@@ -90,7 +93,7 @@ class GetHTMLContents {
 	private function convert_relative_paths_to_absolute( $html_contents, $contents_url ) {
 
 		// 正規表現でhref、src、srcset属性を検索
-		$pattern = '/(href|src|srcset)=["\'](?!http|https|\/)([^"\']+)["\']/i';
+		$pattern = '/(href|src|srcset)=["\'](?!http|https|\/\/|#|tel:|mailto:|\[.*?\])([^"\']+)["\']/i';
 
 		// 置換コールバック関数
 		$callback = function ( $matches ) use ( $contents_url ) {
@@ -160,6 +163,18 @@ class GetHTMLContents {
 		// 結合して新しいパスを生成
 		$resolved_path = implode( '/', $resolved_parts );
 
+		return self::build_absolute_url( $parsed_base, $resolved_path );
+	}
+
+	/**
+	 * Builds an absolute URL by combining the scheme, host, port, and resolved path.
+	 *
+	 * @param array  $parsed_base   The parsed base URL components.
+	 * @param string $resolved_path The resolved path to be appended to the base URL.
+	 *
+	 * @return string The generated absolute URL.
+	 */
+	private function build_absolute_url( $parsed_base, $resolved_path ) {
 		// スキーム、ホスト、ポートを結合して完全なURLを生成
 		$resolved_url = $parsed_base['scheme'] . '://' . $parsed_base['host'];
 		if ( isset( $parsed_base['port'] ) ) {
@@ -168,5 +183,65 @@ class GetHTMLContents {
 		$resolved_url .= $resolved_path;
 
 		return $resolved_url;
+	}
+
+
+	// private function replace_text( $text ) {
+
+	//  // 置換処理
+	//  foreach ( $this->replacements as $replacement ) {
+	//      if ( ! isset( $replacement['target'] ) ) {
+	//          continue;
+	//      }
+	//      $text = str_replace( $replacement['target'], $replacement['new'], $text );
+	//  }
+
+	//  return $text;
+	// }
+
+	/**
+	 * Retrieves the href attribute values enclosed in square brackets from the provided HTML contents.
+	 *
+	 * @param string $html_contents The HTML contents to parse.
+	 * @return array An array of unique href attribute values enclosed in square brackets.
+	 */
+	private function get_dynamic_links( $html_contents ) {
+		libxml_use_internal_errors( true );
+		// Load HTML
+		$dom = new \DOMDocument();
+		$dom->loadHTML( $html_contents );
+
+		// Retrieve any errors
+		$errors = libxml_get_errors();
+
+		if ( ! empty( $errors ) ) {
+			// Write error handling here
+			foreach ( $errors as $error ) {
+				// Log the error or other handling
+			}
+		}
+
+		// Restore libxml error handling
+		libxml_clear_errors();
+		libxml_use_internal_errors( false );
+
+		// Get a tags
+		$links = $dom->getElementsByTagName( 'a' );
+
+		// Array to store href attribute values
+		$href_values = array();
+
+		// Check href attribute values of a tags
+		foreach ( $links as $link ) {
+			$href = $link->getAttribute( 'href' );
+			// Check if enclosed in []
+			preg_match( '/\[(.*?)\]/', $href, $matches );
+			if ( ! empty( $matches[1] ) ) {
+				$href_values[] = $matches[1];
+			}
+		}
+
+		// Remove duplicates and return
+		return array_unique( $href_values );
 	}
 }

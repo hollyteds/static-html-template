@@ -51,7 +51,7 @@ add_action(
 					'menu_position'         => 50,
 					'publicly_queryable'    => false,
 					'show_ui'               => true,
-					'show_in_rest'          => false,
+					'show_in_rest'          => true,
 					'rest_base'             => '',
 					'rest_controller_class' => 'WP_REST_Posts_Controller',
 					'rest_namespace'        => 'wp/v2',

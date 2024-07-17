@@ -11,20 +11,20 @@ class SetFormParts {
 	/**
 	 * Generates a text form input field.
 	 *
-	 * @param array $option The option settings.
+	 * @param array $options The option settings.
 	 * @param array $settings The current option values.
 	 * @return void
 	 */
-	public function set_text_form( $option ) {
-		$set_value   = isset( $this->data[ $option['name'] ] ) ? esc_attr( $this->data[ $option['name'] ] ) : '';
-		$size        = isset( $option['size'] ) ? esc_attr( $option['size'] ) : '';
-		$placeholder = isset( $option['placeholder'] ) ? esc_attr( $option['placeholder'] ) : '';
+	public function text_form( $options ) {
+		$set_value   = isset( $this->data[ $options['name'] ] ) ? esc_attr( $this->data[ $options['name'] ] ) : '';
+		$size        = isset( $options['size'] ) ? esc_attr( $options['size'] ) : '';
+		$placeholder = isset( $options['placeholder'] ) ? esc_attr( $options['placeholder'] ) : '';
 
-		echo isset( $option['title'] ) ? '<h2 class="title">' . $option['title'] . '</h2>' : '';
-		echo isset( $option['help'] ) ? '<p class="description">' . $option['help'] . '</p>' : '';
+		echo isset( $options['title'] ) ? '<h2 class="title">' . $options['title'] . '</h2>' : '';
+		echo isset( $options['help'] ) ? '<p class="description">' . $options['help'] . '</p>' : '';
 		?>
 	<div>
-	<input type="text" name="scht_settings[<?php echo esc_attr( $option['name'] ); ?>]" size="<?php echo $size; ?>" placeholder="<?php echo $placeholder; ?>" value="<?php echo $set_value; ?>">
+	<input type="text" name="scht_settings[<?php echo esc_attr( $options['name'] ); ?>]" size="<?php echo $size; ?>" placeholder="<?php echo $placeholder; ?>" value="<?php echo $set_value; ?>">
 	</div>
 		<?php
 	}
@@ -32,42 +32,42 @@ class SetFormParts {
 	/**
 	 * Generates a textarea input field.
 	 *
-	 * @param array $option The option settings.
+	 * @param array $options The option settings.
 	 * @param array $settings The current option values.
 	 * @return void
 	 */
-	public function set_textarea( $option ) {
-		$set_value   = isset( $this->data[ $option['name'] ] ) ? esc_attr( $this->data[ $option['name'] ] ) : '';
-		$size        = isset( $option['size'] ) ? esc_attr( $option['size'] ) : '50';
-		$placeholder = isset( $option['placeholder'] ) ? $option['placeholder'] : '';
+	public function textarea( $options ) {
+		$set_value   = isset( $this->data[ $options['name'] ] ) ? esc_attr( $this->data[ $options['name'] ] ) : '';
+		$size        = isset( $options['size'] ) ? esc_attr( $options['size'] ) : '50';
+		$placeholder = isset( $options['placeholder'] ) ? $options['placeholder'] : '';
 
-		echo isset( $option['title'] ) ? '<h2 class="title">' . $option['title'] . '</h2>' : '';
-		echo isset( $option['help'] ) ? '<p class="description">' . $option['help'] . '</p>' : '';
+		echo isset( $options['title'] ) ? '<h2 class="title">' . $options['title'] . '</h2>' : '';
+		echo isset( $options['help'] ) ? '<p class="description">' . $options['help'] . '</p>' : '';
 		?>
 	<div>
-	<textarea name="scht_settings[<?php echo esc_attr( $option['name'] ); ?>]" cols="<?php echo $size; ?>" rows="5" placeholder="<?php echo $placeholder; ?>"><?php echo $set_value; ?></textarea>
+	<textarea name="scht_settings[<?php echo esc_attr( $options['name'] ); ?>]" cols="<?php echo $size; ?>" rows="5" placeholder="<?php echo $placeholder; ?>"><?php echo $set_value; ?></textarea>
 	</div>
 		<?php
 	}
 
 	/**
-	* Generates a textarea input field.
+	* Generates a checkbox input field.
 	*
-	* @param array $option The option settings.
+	* @param array $options The option settings.
 	* @param array $settings The current option values.
 	* @return void
 	*/
-	public function set_checkbox( $option ) {
-		$set_value   = isset( $this->data[ $option['name'] ] ) ? esc_attr( $this->data[ $option['name'] ] ) : '';
-		$size        = isset( $option['size'] ) ? esc_attr( $option['size'] ) : '50';
-		$placeholder = isset( $option['placeholder'] ) ? $option['placeholder'] : __( 'If there are multiple entries, input them with line breaks.', 'static-html-template' );
+	public function checkbox( $options ) {
+		$checked = ( isset( $this->data[ $options['name'] ] ) && (bool) $this->data[ $options['name'] ] ) ? ' checked' : '';
+		$label   = isset( $options['label'] ) ? esc_html( $options['label'] ) : '';
 
-		echo isset( $option['title'] ) ? '<h2 class="title">' . $option['title'] . '</h2>' : '';
-		echo isset( $option['help'] ) ? '<p class="description">' . $option['help'] . '</p>' : '';
+		echo isset( $options['title'] ) ? '<h2 class="title">' . $options['title'] . '</h2>' : '';
+		echo isset( $options['help'] ) ? '<p class="description">' . $options['help'] . '</p>' : '';
 		?>
-	<div>
-	<input type="checkbox" name="scht_settings[<?php echo esc_attr( $option['name'] ); ?>]" size="<?php echo $size; ?>" placeholder="<?php echo $placeholder; ?>" value="<?php echo $set_value; ?>">
-	</div>
+		<div>
+			<label><input type="checkbox" name="scht_settings[<?php echo esc_attr( $options['name'] ); ?>]"  <?php echo $checked; ?>><?php echo $label; ?></label>
+		</div>
 		<?php
 	}
+
 }

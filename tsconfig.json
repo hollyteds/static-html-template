@@ -4,9 +4,9 @@
       "noImplicitAny": true,
       "removeComments": true,
       "preserveConstEnums": true,
-      "outDir": "./assets/js/",
+      "outDir": "./assets",
       "rootDir": "./src",  
-      "sourceMap": true
+      "sourceMap": true,
   },
   "include": [
       "src/**/*",
